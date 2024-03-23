@@ -25,7 +25,7 @@ export function Controls() {
     </div>
     <div>
       Speed:
-      <input type='range' min={-1} max={1} step={0.01} value={speed} onChange={e => setSpeed(Number(e.target.value))}/>
+      <input type='range' min={-1} max={2} step={0.01} value={speed} onChange={e => setSpeed(Number(e.target.value))}/>
     </div>
     <div>
       Pan:

@@ -14,7 +14,7 @@ export function createAudio() {
   out.connect(actx.destination);
   generateReverb(actx, { 
     fadeInTime: 0.1,
-    decayTime: 3,
+    decayTime: 5,
     lpFreqStart: 3000,
     lpFreqEnd: 200,
     numChannels: 1,

@@ -10,8 +10,17 @@ export function Display() {
   const display = useRef<HTMLDivElement | null>(null);
   const seeker = useRef<HTMLDivElement | null>(null);
   const pointerDown = useRef(false);
-  const { ctx, buffer, setCanvas, setCtx } = useAppState();
-  const { setPosition, spray, density } = useGrainStore();
+  const ctx = useAppState(state => state.ctx);
+  const buffer = useAppState(state => state.buffer);
+  const setCanvas = useAppState(state => state.setCanvas);
+  const setCtx = useAppState(state => state.setCtx);
+  const setPosition = useGrainStore(state => state.setPosition);
+  const setReversePosition = useGrainStore(state => state.setReversePosition);
+  const spray = useGrainStore(state => state.spray);
+  const density = useGrainStore(state => state.density);
+  const seekerOverflowLeft = useRef<HTMLDivElement | null>(null)
+  const seekerOverflowRight = useRef<HTMLDivElement | null>(null)
+  const sprayRef = useRef<HTMLDivElement | null>(null)
   const intervalID = useRef(0);
   const clear = useRef(false);
   
@@ -31,9 +40,11 @@ export function Display() {
     const { left, width } = display.current.getBoundingClientRect();
     
     const displayX = lerp(left, left + width, 0.5);
-    setSeeker(displayX);
+    setSeeker(displayX, displayX);
   }, [])
 
+
+  // create grain loop
   useEffect(() => {
     if (!buffer) return;
     clearInterval(intervalID.current);
@@ -55,7 +66,7 @@ export function Display() {
     loop();
   }, [buffer, density]);
 
-
+  // draw waveform
   useEffect(() => {
     if (!buffer || !canvas.current) return;
 
@@ -69,7 +80,7 @@ export function Display() {
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, width, height);
       
-      ctx.fillStyle = '#a9e8ff';
+      ctx.fillStyle = '#a9d5ff';
       for (let i = 0; i < width; i++) {
         let min = 1.0;
         let max = -1.0;
@@ -99,11 +110,15 @@ export function Display() {
     pointerDown.current = false;
   }
 
-  function setSeeker(x: number) {
-    if (!seeker.current) return;
+  function setSeeker(x: number, rx: number) {
+    if (!seeker.current || !seekerOverflowLeft.current || !seekerOverflowRight.current || !sprayRef.current || !canvas.current) return;
+
     
     seeker.current.style.transform = `translateX(${x}px)`;
+    seekerOverflowLeft.current.style.transform = `translateX(${x - canvas.current.width}px)`;
+    seekerOverflowRight.current.style.transform = `translateX(${x + canvas.current.width}px)`;
     setPosition(x);
+    setReversePosition(rx);
   }
   
   function moveSeeker(e: MouseEvent) {
@@ -114,7 +129,8 @@ export function Display() {
     const { left, width } = display.current.getBoundingClientRect();
     
     const displayX = range(x, 0, window.innerWidth, left, left + width);
-    setSeeker(displayX);
+    const reverseX = range(x, window.innerWidth, 0, left, left + width);
+    setSeeker(displayX, reverseX);
   }
 
   return (
@@ -123,8 +139,14 @@ export function Display() {
       </Grains>
       <Seeker ref={seeker}>
         <Line/>
-        <Spray width={spray}/>
+        <Spray ref={sprayRef} width={spray}/>
       </Seeker>
+      <SeekerOverflowLeft ref={seekerOverflowLeft}>
+        <Spray ref={sprayRef} width={spray}/>
+      </SeekerOverflowLeft>
+      <SeekerOverflowRight ref={seekerOverflowRight}>
+        <Spray ref={sprayRef} width={spray}/>
+      </SeekerOverflowRight>
       <Waveform ref={canvas}/>
     </Wrapper>
   )
@@ -147,6 +169,7 @@ width: 0.05vw;
 height: 100%;
 transform: translateX(400px);
 z-index: 2;
+pointer-events: none;
 `
 const Line = styled.div`
 position: absolute;
@@ -154,19 +177,25 @@ width: 0.05vw;
 height: 100%;
 background-color: white;
 z-index: 2;
+pointer-events: none;
 `
 const Spray = styled.div<{ width: number }>`
-${({ width }) => `
+${({ width }) => width && `
   width: ${width * 2}px;
   left: -${width}px;
 `}
 height: 100%;
-background-color: #0095cf77;
+background-color: #008bdb7a;
 position: absolute;
+`
+const SeekerOverflowLeft = styled(Seeker)`
+
+`
+const SeekerOverflowRight = styled(Seeker)`
 `
 const Grains = styled.div`
 position: absolute;
 width: 100%;
 height: 100%;
-z-index: 1;
+z-index: 4;
 `

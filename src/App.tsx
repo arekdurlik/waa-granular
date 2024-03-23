@@ -22,8 +22,10 @@ function cloneAudioBuffer(fromAudioBuffer: AudioBuffer) {
 }
 
 function App() {
-  const { actx, setBuffer, setReverseBuffer } = useAppState()
-
+  const actx = useAppState(state => state.actx)
+  const setBuffer = useAppState(state => state.setBuffer)
+  const setReverseBuffer = useAppState(state => state.setReverseBuffer)
+  
   async function handleLoadSample() {
     const [fileHandle] = await window.showOpenFilePicker({
       types: [
@@ -44,7 +46,7 @@ function App() {
 
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await actx.decodeAudioData(arrayBuffer);
-    setBuffer(audioBuffer)
+    setBuffer(audioBuffer);
 
     const reverseBuffer = cloneAudioBuffer(audioBuffer);
 
