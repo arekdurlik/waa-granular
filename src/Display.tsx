@@ -14,14 +14,19 @@ export function Display() {
   const buffer = useAppState(state => state.buffer);
   const setCanvas = useAppState(state => state.setCanvas);
   const setCtx = useAppState(state => state.setCtx);
+  const position = useGrainStore(state => state.position);
+  const reversePosition = useGrainStore(state => state.reversePosition);
   const setPosition = useGrainStore(state => state.setPosition);
   const setReversePosition = useGrainStore(state => state.setReversePosition);
   const spray = useGrainStore(state => state.spray);
+  const seek = useGrainStore(state => state.seek);
+  const setSeek = useGrainStore(state => state.setSeek);
   const density = useGrainStore(state => state.density);
   const seekerOverflowLeft = useRef<HTMLDivElement | null>(null)
   const seekerOverflowRight = useRef<HTMLDivElement | null>(null)
   const sprayRef = useRef<HTMLDivElement | null>(null)
   const intervalID = useRef(0);
+  const seekIntervalID = useRef(0);
   const clear = useRef(false);
   
   useEffect(() => {
@@ -43,12 +48,34 @@ export function Display() {
     setSeeker(displayX, displayX);
   }, [])
 
+  useEffect(() => {
+    clearInterval(seekIntervalID.current);
+
+    seekIntervalID.current = setInterval(() => {
+      if (!canvas.current) return
+
+      const { position, reversePosition, seek } = useGrainStore.getState()
+      let newPosition = position + seek
+      let newReversePosition = reversePosition - seek
+
+      if (newPosition > canvas.current.width) {
+        newPosition = 0
+        newReversePosition = canvas.current.width
+      } else if (newPosition < 0) {
+        newPosition = canvas.current.width
+        newReversePosition = 0
+      }
+
+      setSeeker(newPosition, newReversePosition);
+    }, 10)
+  }, [seek])
 
   // create grain loop
   useEffect(() => {
     if (!buffer) return;
     clearInterval(intervalID.current);
     clear.current = true;
+    const container = document.querySelector('.grains');
 
     setTimeout(() => {
       intervalID.current = setInterval(loop, 1000 - density);
@@ -60,7 +87,7 @@ export function Display() {
         return;
       }
 
-      createGrain();
+      createGrain(container!);
     }
 
     loop();
@@ -173,9 +200,9 @@ pointer-events: none;
 `
 const Line = styled.div`
 position: absolute;
-width: 0.05vw;
+width: 1px;
 height: 100%;
-background-color: white;
+background-color: #fff;
 z-index: 2;
 pointer-events: none;
 `

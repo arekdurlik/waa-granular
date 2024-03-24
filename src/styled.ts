@@ -7,6 +7,11 @@ export const GlobalStyle = createGlobalStyle`
   height: 100vh;
 }
 
+input[type="range"] {
+  min-width: 300px;
+  width: 100%;
+}
+
 body {
   margin: 0;
   overflow: hidden;
@@ -16,5 +21,13 @@ body {
 canvas {
   image-rendering: pixelated;
   shape-rendering: crispEdges;
+}
+
+.grain {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #0cf;
+  pointer-events: none;
 }
 `
