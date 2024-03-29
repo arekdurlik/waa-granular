@@ -3,8 +3,8 @@ import { useGrainStore } from './stores/grainStore'
 import { useAppState } from './stores/appStore'
 
 export function Controls() {
-  const { canvas, grains } = useAppState()
-  const { spray, setSpray, speed, setSpeed, direction, setDirection, pan, setPan, size, setSize, density, setDensity, seek, setSeek } = useGrainStore()
+  const { canvas, grains, master } = useAppState()
+  const grain = useGrainStore()
   const sprayMax = (canvas?.width ?? 1) / 2
 
   return <Wrapper>
@@ -12,32 +12,44 @@ export function Controls() {
       Grains: {grains}
     </div>
     <Slider>
-      <span>Grain density:</span>
-      <input type='range' min={0.01} max={1000} step={0.01} value={density} onChange={e => setDensity(Number(e.target.value))}/>
+      <span>Master volume: {Math.round(master!.gain.value * 100) / 100}</span>
+      <input type='range' min={0} max={1} step={0.01} value={master?.gain.value} onChange={e => master!.gain.value = (Number(e.target.value))}/>
     </Slider>
     <Slider>
-      <span>Grain size:</span>
-      <input type='range' min={0.04} max={3} step={0.01} value={size} onChange={e => setSize(Number(e.target.value))}/>
+      <span>Grain density: {grain.density}</span>
+      <input type='range' min={0.01} max={1000} step={0.01} value={grain.density} onChange={e => grain.setDensity(Number(e.target.value))}/>
     </Slider>
     <Slider>
-      <span>Spray:</span>
-      <input type='range' min={0} max={sprayMax} step={0.1} value={spray} onChange={e => setSpray(Number(e.target.value))}/>
+      <span>Grain size: {grain.size}</span>
+      <input type='range' min={0.04} max={3} step={0.01} value={grain.size} onChange={e => grain.setSize(Number(e.target.value))}/>
     </Slider>
     <Slider>
-      <span>Speed:</span>
-      <input type='range' min={-1} max={2} step={0.01} value={speed} onChange={e => setSpeed(Number(e.target.value))}/>
+      <span>Grain Attack: {grain.attack}</span>
+      <input type='range' min={0} max={1} step={0.01} value={grain.attack} onChange={e => grain.setAttack(Number(e.target.value))}/>
     </Slider>
     <Slider>
-      <span>Direction:</span>
-      <input type='range' min={0} max={1} step={0.01} value={direction} onChange={e => setDirection(Number(e.target.value))}/>
+      <span>Grain Decay: {grain.decay}</span>
+      <input type='range' min={0} max={1} step={0.01} value={grain.decay} onChange={e => grain.setDecay(Number(e.target.value))}/>
     </Slider>
-    <div>
-      <span>Seek:</span>
-      <input type='range' min={-3} max={3} step={0.001} value={seek} onChange={e => setSeek(Number(e.target.value))}/>
-    </div>
     <Slider>
-      <span>Pan:</span>
-      <input type='range' min={0} max={1} step={0.01} value={pan} onChange={e => setPan(Number(e.target.value))}/>
+      <span>Spray: {grain.spray}</span>
+      <input type='range' min={0} max={sprayMax} step={0.01} value={grain.spray} onChange={e => grain.setSpray(Number(e.target.value))}/>
+    </Slider>
+    <Slider>
+      <span>Pan: {grain.pan}</span>
+      <input type='range' min={0} max={1} step={0.01} value={grain.pan} onChange={e => grain.setPan(Number(e.target.value))}/>
+    </Slider>
+    <Slider>
+      <span>Pitch: {grain.pitch}</span>
+      <input type='range' min={0} max={2} step={0.001} value={grain.pitch} onChange={e => grain.setPitch(Number(e.target.value))}/>
+    </Slider>
+    <Slider>
+      <span>Direction: {grain.direction}</span>
+      <input type='range' min={0} max={1} step={0.01} value={grain.direction} onChange={e => grain.setDirection(Number(e.target.value))}/>
+    </Slider>
+    <Slider>
+      <span>Seek: {grain.seek}</span>
+      <input type='range' min={-3} max={3} step={0.001} value={grain.seek} onChange={e => grain.setSeek(Number(e.target.value))}/>
     </Slider>
 </Wrapper>
 }
@@ -47,7 +59,7 @@ margin: 10px;
 color: white;
 display: flex;
 flex-direction: column;
-gap: 10px;
+gap: 4px;
 `
 
 const Slider = styled.div`

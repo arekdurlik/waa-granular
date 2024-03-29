@@ -2,9 +2,10 @@ import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
 
-#root {
-  width: 100vw;
-  height: 100vh;
+html {
+  color-scheme: dark;
+  font-family: sans-serif;
+  letter-spacing: 1px;
 }
 
 input[type="range"] {
@@ -14,13 +15,14 @@ input[type="range"] {
 
 body {
   margin: 0;
-  overflow: hidden;
+  overflow-x: hidden;
   background-color: #222;
 }
 
 canvas {
   image-rendering: pixelated;
   shape-rendering: crispEdges;
+  min-height: 400px;
 }
 
 .grain {

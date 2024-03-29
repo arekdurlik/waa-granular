@@ -1,12 +1,12 @@
 import { create } from 'zustand'
 
 interface State {
-  actx: AudioContext,
-  output: GainNode | null,
+  actx: AudioContext
+  master: GainNode | null
+  setMaster: (master: GainNode) => void
   grains: number,
-  incGrains: () => void
-  decGrains: () => void
-  setOutput: (output: GainNode) => void
+  incGrains: () => number
+  decGrains: () => number
   buffer: AudioBuffer | null
   reverseBuffer: AudioBuffer | null
   setBuffer: (buffer: AudioBuffer) => void
@@ -22,11 +22,19 @@ export const useAppState = create<State>((set, get) => ({
     latencyHint: 'interactive',
     sampleRate: 44100
   }),
-  output: null,
+  master: null,
+  setMaster: (master) => set({ master }),
   grains: 0,
-  incGrains: () => set({ grains: get().grains + 1 }),
-  decGrains: () => set({ grains: get().grains - 1 }),
-  setOutput: (output) => set({ output }),
+  incGrains: () => {
+    const grains = get().grains + 1;
+    set({ grains });
+    return grains;
+  },
+  decGrains: () => {
+    const grains = get().grains - 1;
+    set({ grains });
+    return grains;
+  },
   buffer: null,
   reverseBuffer: null,
   setBuffer: (buffer) => set({ buffer }),

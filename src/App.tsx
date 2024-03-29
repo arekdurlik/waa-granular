@@ -4,22 +4,9 @@ import { Display } from './Display'
 import { useAppState } from './stores/appStore'
 import { createAudio } from './audio'
 import { Controls } from './Controls'
+import { cloneAudioBuffer } from './helpers'
 
 createAudio();
-
-function cloneAudioBuffer(fromAudioBuffer: AudioBuffer) {
-  const audioBuffer = new AudioBuffer({
-    length:fromAudioBuffer.length, 
-    numberOfChannels:fromAudioBuffer.numberOfChannels, 
-    sampleRate:fromAudioBuffer.sampleRate
-  });
-
-  for (let channelI = 0; channelI < audioBuffer.numberOfChannels; ++channelI) {
-    const samples = fromAudioBuffer.getChannelData(channelI);
-    audioBuffer.copyToChannel(samples, channelI);
-  }
-  return audioBuffer;
-}
 
 function App() {
   const actx = useAppState(state => state.actx)
@@ -62,7 +49,7 @@ function App() {
       <Buttons>
         <button onClick={handleLoadSample}>Load sample</button>
       </Buttons>
-      <Display />
+      <Display/>
       <Controls/>
     </Wrapper>
   )
@@ -78,6 +65,9 @@ flex-direction: column;
 `
 
 const Buttons = styled.div`
+margin: 10px;
+display: flex;
+gap: 10px;
 position: absolute;
 z-index: 999;
 `
