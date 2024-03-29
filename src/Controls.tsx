@@ -13,7 +13,7 @@ export function Controls() {
     </div>
     <Slider>
       <span>Master volume: {Math.round(master!.gain.value * 100) / 100}</span>
-      <input type='range' min={0} max={1} step={0.01} value={master?.gain.value} onChange={e => master!.gain.value = (Number(e.target.value))}/>
+      <input type='range' min={0} max={2} step={0.01} value={master?.gain.value} onChange={e => master!.gain.value = (Number(e.target.value))}/>
     </Slider>
     <Slider>
       <span>Grain density: {grain.density}</span>

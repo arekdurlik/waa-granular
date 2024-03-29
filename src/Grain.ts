@@ -1,4 +1,4 @@
-import { lerp, range, secondsToTimeConstant } from './helpers'
+import { invlerp, lerp, range, secondsToTimeConstant } from './helpers'
 import { useAppState } from './stores/appStore'
 import { useGrainStore } from './stores/grainStore'
 
@@ -68,7 +68,10 @@ export function createGrain(container: Element) {
   const decay = Math.min(grainState.decay, 1 - grainState.attack) * grainState.size
   const decayStart = actx.currentTime + grainState.size - decay
 
-  gain.gain.setTargetAtTime(1, actx.currentTime, attack); // attack
+  // stabilize combined volume of grains
+  const volume = 1 / Math.sqrt(grains);
+
+  gain.gain.setTargetAtTime(volume, actx.currentTime, attack); // attack
   gain.gain.setTargetAtTime(0, decayStart, secondsToTimeConstant(decay)); // decay
 
   src.stop(actx.currentTime + grainState.size);
@@ -107,7 +110,7 @@ export function createGrain(container: Element) {
     }
 
     grain.style.left = newPos + 'px';
-    grain.style.opacity = `${gain.gain.value}`;
+    grain.style.opacity = `${invlerp(0, 1 / Math.sqrt(grains), gain.gain.value)}`;
   }
 
   animateGrain();
