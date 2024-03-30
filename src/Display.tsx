@@ -18,6 +18,7 @@ export function Display() {
   const setPosition = useGrainStore(state => state.setPosition);
   const setReversePosition = useGrainStore(state => state.setReversePosition);
   const spray = useGrainStore(state => state.spray);
+  const pan = useGrainStore(state => state.pan);
   const seek = useGrainStore(state => state.seek);
   const density = useGrainStore(state => state.density);
   const seekerOverflowLeft = useRef<HTMLDivElement | null>(null);
@@ -181,18 +182,21 @@ export function Display() {
         <Spray 
           ref={sprayRef} 
           width={spray} 
+          height={pan}
         />
       </Seeker>
       <Seeker ref={seekerOverflowLeft}>
         <Spray 
           ref={sprayRef} 
           width={spray} 
+          height={pan}
         />
       </Seeker>
       <Seeker ref={seekerOverflowRight}>
         <Spray 
           ref={sprayRef} 
           width={spray} 
+          height={pan}
         />
       </Seeker>
       <Waveform ref={canvas}/>
@@ -229,13 +233,13 @@ background-color: #fff;
 z-index: 2;
 pointer-events: none;
 `
-const Spray = styled.div<{ width: number}>`
+const Spray = styled.div<{ width: number, height: number }>`
 ${({ width }) => width && `
   width: ${width * 2}px;
   left: -${width}px;
 `}
 
-height: 100%;
+${({ height }) => `height: calc(${height * 100}% + ${20 - (20 * height)}px);`}
 background-color: #008bdb7a;
 position: absolute;
 `
