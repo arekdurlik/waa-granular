@@ -1,5 +1,7 @@
 import { createGlobalStyle } from 'styled-components'
 
+export const main_color = '#0cf';
+
 export const GlobalStyle = createGlobalStyle`
 
 html {
@@ -29,7 +31,7 @@ canvas {
   position: absolute;
   width: 20px;
   height: 20px;
-  background-color: #0cf;
+  background-color: ${main_color};
   pointer-events: none;
 }
 `

@@ -1,20 +1,16 @@
+import { notes } from './constants'
 import { invlerp, lerp, range, secondsToTimeConstant } from './helpers'
 import { useAppState } from './stores/appStore'
 import { useGrainStore } from './stores/grainStore'
 
-const MAX_GRAINS = 1024
-
-export function createGrain(container: Element) {
+export function createGrain(container: Element, note: string) {
   const grainState = useGrainStore.getState();
-  const { buffer, reverseBuffer, canvas, actx, master, incGrains, decGrains } = useAppState.getState();
+  const { buffer, reverseBuffer, canvas, actx, master, incGrains, decGrains, grains, maxGrains } = useAppState.getState();
   if (!buffer?.duration || !canvas || !master) return;
   
-  const grains = incGrains();
+  if (grains >= maxGrains) return;
 
-  if (grains >= MAX_GRAINS) {
-     decGrains();
-     return;
-  }
+  incGrains();
 
   // position + spray
   const spray = lerp(-grainState.spray, grainState.spray, Math.random());
@@ -37,8 +33,11 @@ export function createGrain(container: Element) {
   // pan
   const pan = lerp(-grainState.pan, grainState.pan, Math.random());
   
+  const twelvethRootOfTwo = Math.pow(2.0, 1.0 / 12.0);
+  const noteMultiplier = Math.pow(twelvethRootOfTwo, notes.indexOf(note));
+
   // setup audio & connect nodes
-  const src = new AudioBufferSourceNode(actx, { loop: true, playbackRate: Math.abs(grainState.pitch) });
+  const src = new AudioBufferSourceNode(actx, { loop: true, playbackRate: Math.abs(grainState.pitch * noteMultiplier )});
   const panner = new StereoPannerNode(actx, { pan });
   const gain = new GainNode(actx, { gain: 0 });
 
@@ -48,9 +47,9 @@ export function createGrain(container: Element) {
     .connect(master);
 
   // direction & speed
-  // direction == 0 - all reverse 
-  // direction == 1 - all forward
-  let direction = grainState.pitch;
+  // grainState.direction == 0 - all reverse 
+  // grainState.direction == 1 - all forward
+  let direction = grainState.pitch * noteMultiplier;
   if (Math.random() > grainState.direction) {
     direction = direction * -1;
   }
@@ -64,9 +63,21 @@ export function createGrain(container: Element) {
   }
 
   // attack & decay
-  const attack = Math.min(grainState.attack, 1 - grainState.decay) * grainState.size
-  const decay = Math.min(grainState.decay, 1 - grainState.attack) * grainState.size
-  const decayStart = actx.currentTime + grainState.size - decay
+  let attack = grainState.attack;
+  let decay = grainState.decay;
+
+  const sum = attack + decay;
+
+  if (sum > 1) {
+    const scale = 1/sum;
+    attack *= scale;
+    decay *= scale;
+  }
+
+  attack *= grainState.size;
+  decay *= grainState.size;
+  
+  const decayStart = actx.currentTime + grainState.size - decay;
 
   // stabilize combined volume of grains
   const volume = 1 / Math.sqrt(grains);
@@ -74,7 +85,7 @@ export function createGrain(container: Element) {
   gain.gain.setTargetAtTime(volume, actx.currentTime, attack); // attack
   gain.gain.setTargetAtTime(0, decayStart, secondsToTimeConstant(decay)); // decay
 
-  src.stop(actx.currentTime + grainState.size);
+  src.stop(actx.currentTime + grainState.size + 0.2);
   
   // create grain element
   const grain = document.createElement('div');
@@ -86,7 +97,7 @@ export function createGrain(container: Element) {
   // animate grain element
   let rafID = 0;
   const startTime = performance.now();
-  let currentOffset = 0;
+  let currentOffset = - 10 // grain width/2;
 
   function animateGrain() {
     if (!canvas) return
@@ -104,7 +115,7 @@ export function createGrain(container: Element) {
     let newPos = pos + currentOffset;
 
     if (newPos < 0) {
-      newPos = canvas.width;
+      newPos += canvas.width - 20;
     } else if (newPos > canvas.width) {
       newPos -= canvas.width;
     }

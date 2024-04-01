@@ -7,6 +7,8 @@ interface State {
   grains: number,
   incGrains: () => number
   decGrains: () => number
+  maxGrains: number
+  setMaxGrains: (grainLimit: number) => void
   buffer: AudioBuffer | null
   reverseBuffer: AudioBuffer | null
   setBuffer: (buffer: AudioBuffer) => void
@@ -15,6 +17,9 @@ interface State {
   setCanvas: (canvas: HTMLCanvasElement) => void
   ctx: CanvasRenderingContext2D | null,
   setCtx: (ctx: CanvasRenderingContext2D) => void
+  activeNotes: string[],
+  activateNote: (key: string) => void
+  deactivateNote: (key: string) => void
 }
 
 export const useAppState = create<State>((set, get) => ({
@@ -35,6 +40,8 @@ export const useAppState = create<State>((set, get) => ({
     set({ grains });
     return grains;
   },
+  maxGrains: 1024,
+  setMaxGrains: (maxGrains) => set({ maxGrains }),
   buffer: null,
   reverseBuffer: null,
   setBuffer: (buffer) => set({ buffer }),
@@ -43,4 +50,15 @@ export const useAppState = create<State>((set, get) => ({
   setCanvas: (canvas) => set({ canvas }),
   ctx: null,
   setCtx: (ctx) => set({ ctx }),
+  activeNotes: ['A'],
+  activateNote: (note) => {
+    const notes = get().activeNotes;
+    const newNotes = [...notes, note];
+    set({ activeNotes: newNotes });
+  },
+  deactivateNote: (note) => {
+    const newNotes = [...get().activeNotes];
+    newNotes.splice(newNotes.findIndex(n => n === note), 1);
+    set({ activeNotes: newNotes });
+  }
 }))

@@ -5,6 +5,7 @@ import { useAppState } from './stores/appStore'
 import { createAudio } from './audio'
 import { Controls } from './Controls'
 import { cloneAudioBuffer } from './helpers'
+import { Keyboard } from './Keyboard'
 
 createAudio();
 
@@ -50,6 +51,7 @@ function App() {
         <button onClick={handleLoadSample}>Load sample</button>
       </Buttons>
       <Display/>
+      <Keyboard/>
       <Controls/>
     </Wrapper>
   )

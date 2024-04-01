@@ -25,6 +25,7 @@ export function Display() {
   const seekerOverflowRight = useRef<HTMLDivElement | null>(null);
   const sprayRef = useRef<HTMLDivElement | null>(null);
   const intervalID = useRef(0);
+  const timeoutID = useRef(0);
   const seekIntervalID = useRef(0);
   const clear = useRef(false);
   
@@ -76,6 +77,7 @@ export function Display() {
   // create grain loop
   useEffect(() => {
     clearInterval(intervalID.current);
+    clearTimeout(timeoutID.current);
     clear.current = true;
     
     if (!buffer) return;
@@ -93,7 +95,16 @@ export function Display() {
         return;
       }
 
-      createGrain(container!);
+      const activeNotes = useAppState.getState().activeNotes;
+      
+
+      activeNotes.forEach((note, i) => {
+        const timeout = ((1000 - density) / activeNotes.length) * i;
+
+        timeoutID.current = setTimeout(() => {
+          createGrain(container!, note);
+        }, timeout);
+      })
     }
 
     loop();

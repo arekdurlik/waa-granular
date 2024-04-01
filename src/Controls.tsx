@@ -3,7 +3,7 @@ import { useGrainStore } from './stores/grainStore'
 import { useAppState } from './stores/appStore'
 
 export function Controls() {
-  const { canvas, grains, master } = useAppState()
+  const { canvas, grains, master, maxGrains, setMaxGrains } = useAppState()
   const grain = useGrainStore()
   const sprayMax = (canvas?.width ?? 1) / 2
 
@@ -11,6 +11,10 @@ export function Controls() {
     <div>
       Grains: {grains}
     </div>
+    <Slider>
+      <span>Max Grains: {maxGrains}</span>
+      <input type='range' min={0} max={1024} step={1} value={maxGrains} onChange={e => setMaxGrains(Number(e.target.value))}/>
+    </Slider>
     <Slider>
       <span>Master volume: {Math.round(master!.gain.value * 100) / 100}</span>
       <input type='range' min={0} max={2} step={0.01} value={master?.gain.value} onChange={e => master!.gain.value = (Number(e.target.value))}/>
